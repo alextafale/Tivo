@@ -1,0 +1,50 @@
+version: '3.9'
+
+services:
+  # ─── PostgreSQL 16 ──────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: tivo_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER:     tivo
+      POSTGRES_PASSWORD: tivopass
+      POSTGRES_DB:       tivo_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/src/infrastructure/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tivo -d tivo_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── TIVO Backend ────────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tivo_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ./backend/.env
+    environment:
+      DATABASE_URL: postgresql://tivo:tivopass@postgres:5432/tivo_db
+      NODE_ENV:     production
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend/.env:/app/.env:ro
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  default:
+    name: tivo_network

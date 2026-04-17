@@ -1,0 +1,17 @@
+# Backend dependencies
+node_modules/
+dist/
+
+# Secrets — nunca versionar
+.env
+
+# Drizzle migrations generadas
+drizzle/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
