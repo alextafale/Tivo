@@ -9,8 +9,8 @@ services:
     runtime: node
     plan: free          # free tier: 512MB RAM, se suspende tras 15min inactividad
     rootDir: backend
-    buildCommand: npm install && npm run build && npm run db:push
-    startCommand: npm start
+    buildCommand: npm install && npm run build
+    startCommand: npm run db:push && node dist/server.js
     healthCheckPath: /health
     autoDeploy: true
     envVars:
